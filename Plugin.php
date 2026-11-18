@@ -13,6 +13,8 @@ use Kanboard\Plugin\Resend\Transport\Resend;
  */
 class Plugin extends Base
 {
+    public const VERSION = '1.0.0';
+
     public function initialize(): void
     {
         $this->emailClient->setTransport('resend', Resend::class);
@@ -40,7 +42,7 @@ class Plugin extends Base
 
     public function getPluginVersion(): string
     {
-        return '1.0.0';
+        return self::VERSION;
     }
 
     public function getPluginHomepage(): string
