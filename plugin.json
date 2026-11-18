@@ -1,0 +1,10 @@
+{
+    "name": "Resend",
+    "description": "Send all Kanboard email through the Resend HTTP API.",
+    "version": "1.0.0",
+    "author": "Carmelo Santana",
+    "homepage": "https://github.com/carmelosantana/kanboard-resend",
+    "license": "MIT",
+    "kanboard_version": ">=1.2.47",
+    "php_version": ">=8.4"
+}
