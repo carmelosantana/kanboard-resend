@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\Resend;
 
 use Kanboard\Core\Plugin\Base;
+use Kanboard\Core\Security\Role;
 use Kanboard\Plugin\Resend\Transport\Resend;
 
 /**
@@ -21,8 +22,10 @@ class Plugin extends Base
 
         $this->hook->on('template:config:sidebar', ['template' => 'Resend:config/sidebar']);
 
-        $this->route->addRoute('resend/settings', 'SettingsController', 'show', 'Resend');
-        $this->route->addRoute('resend/save', 'SettingsController', 'save', 'Resend');
+        $this->applicationAccessMap->add('ResendSettingsController', ['show', 'save'], Role::APP_ADMIN);
+
+        $this->route->addRoute('resend/settings', 'ResendSettingsController', 'show', 'Resend');
+        $this->route->addRoute('resend/save', 'ResendSettingsController', 'save', 'Resend');
     }
 
     public function getPluginName(): string

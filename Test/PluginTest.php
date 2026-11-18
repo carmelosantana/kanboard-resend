@@ -15,6 +15,17 @@ class PluginTest extends Base
         $this->assertInstanceOf(Resend::class, $this->container['emailClient']->getTransport('resend'));
     }
 
+    public function testSettingsPagesAreAdminOnly(): void
+    {
+        (new Plugin($this->container))->initialize();
+        $authz = $this->container['applicationAuthorization'];
+        foreach (['show', 'save'] as $action) {
+            $this->assertTrue($authz->isAllowed('ResendSettingsController', $action, \Kanboard\Core\Security\Role::APP_ADMIN));
+            $this->assertFalse($authz->isAllowed('ResendSettingsController', $action, \Kanboard\Core\Security\Role::APP_MANAGER));
+            $this->assertFalse($authz->isAllowed('ResendSettingsController', $action, \Kanboard\Core\Security\Role::APP_USER));
+        }
+    }
+
     public function testVersionMatchesPluginJson(): void
     {
         $json = json_decode(file_get_contents(__DIR__ . '/../plugin.json'), true);
