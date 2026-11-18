@@ -39,6 +39,16 @@ class Resend extends Base implements ClientInterface
         $config = new ResendConfig($this->container);
         $key = $config->apiKey();
 
+        try {
+            $this->send($config, $key, $recipientEmail, $recipientName, $subject, $html, $authorName, $authorEmail);
+        } catch (\Throwable $e) {
+            $message = 'Resend: ' . $e->getMessage();
+            $this->logger->error($key === '' ? $message : str_replace($key, '[redacted]', $message));
+        }
+    }
+
+    private function send(ResendConfig $config, string $key, $recipientEmail, $recipientName, $subject, $html, $authorName, $authorEmail): void
+    {
         if ($key === '') {
             $this->logger->error('Resend: no API key configured; email to ' . $recipientEmail . ' not sent');
             return;
@@ -70,7 +80,7 @@ class Resend extends Base implements ClientInterface
                 'Content-Type: application/json',
                 'User-Agent: kanboard-resend/' . Plugin::VERSION,
             ],
-            (string) json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            (string) json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
         );
 
         if ($status >= 200 && $status < 300) {

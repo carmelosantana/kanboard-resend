@@ -22,6 +22,14 @@ class FakeHttpClient implements HttpClient
     }
 }
 
+class ThrowingHttpClient implements HttpClient
+{
+    public function postJson(string $url, array $headers, string $body): array
+    {
+        throw new \Error('Call to undefined function curl_init() with re_test');
+    }
+}
+
 class ResendTransportTest extends Base
 {
     private array $logs = [];
@@ -151,5 +159,24 @@ class ResendTransportTest extends Base
         $this->assertCount(1, $this->errors());
         $this->assertStringContainsString('Could not resolve host', $this->errors()[0]);
         $this->assertKeyNeverLogged();
+    }
+
+    public function testThrowingHttpClientIsLoggedNotThrown(): void
+    {
+        $t = new Resend($this->container);
+        $t->setHttpClient(new ThrowingHttpClient());
+        $t->sendEmail('bob@example.com', 'Bob', 'Hello', '<p>Hi</p>', 'Alice', '');
+        $this->assertCount(1, $this->errors());
+        $this->assertStringContainsString('curl_init', $this->errors()[0]);
+        $this->assertKeyNeverLogged();
+    }
+
+    public function testInvalidUtf8IsSubstitutedNotDropped(): void
+    {
+        $http = new FakeHttpClient();
+        $t = new Resend($this->container);
+        $t->setHttpClient($http);
+        $t->sendEmail('bob@example.com', 'Bob', "Caf\xE9", '<p>Hi</p>', 'Alice', '');
+        $this->assertSame("Caf\u{FFFD}", $http->calls[0]['body']['subject']);
     }
 }
