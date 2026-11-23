@@ -10,6 +10,9 @@ class PluginTest extends Base
 {
     public function testResendTransportRegistered(): void
     {
+        // A real mail client: Kanboard 1.2.5x's test Base stubs every emailClient method, so setTransport() is a no-op.
+        unset($this->container['emailClient']);
+        $this->container['emailClient'] = new \Kanboard\Core\Mail\Client($this->container);
         (new Plugin($this->container))->initialize();
         $this->assertArrayHasKey('resend', $this->container['emailClient']->getAvailableTransports());
         $this->assertInstanceOf(Resend::class, $this->container['emailClient']->getTransport('resend'));
